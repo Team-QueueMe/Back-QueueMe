@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 
 
     # database 
-    SQLALCHEMY_DATABASE_URL: str = "sqlite:///./test.db"
+    DATABASE_URL: str = os.environ.get("DATABASE_URL","")
+    
 
 settings = Settings()
