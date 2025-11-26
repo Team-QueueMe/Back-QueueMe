@@ -11,7 +11,7 @@ from db import database, models, schema, crud
 
 router = APIRouter()
 
-@router.get("/api/login/google")
+@router.get("/login/google")
 async def login_google():
     auth_url = (
         f"https://accounts.google.com/o/oauth2/v2/auth"
@@ -23,7 +23,7 @@ async def login_google():
     return RedirectResponse(url=auth_url)
 
 
-@router.get("/api/google-auth", response_model=schema.Token)
+@router.get("/google-auth", response_model=schema.Token)
 async def auth_google_callback(request: Request, code: str, db: Session = Depends(database.get_db)):
     token_url = "https://oauth2.googleapis.com/token"
     token_data = {
@@ -74,7 +74,7 @@ async def auth_google_callback(request: Request, code: str, db: Session = Depend
         "token_type": "bearer"
     }
 
-@router.get("/api/user", response_model=schema.User)
+@router.get("/user", response_model=schema.User)
 async def read_users_me(
     current_user: models.User = Depends(security.get_current_user)
 ):

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api import user
+from api import user, community
 from db import database, models
 
 models.Base.metadata.create_all(bind=database.engine)
@@ -30,6 +30,11 @@ app.include_router(
     user.router, 
     prefix="/api",
     tags=["Authentication & Users"]
+)
+app.include_router(
+    community.router,
+    prefix="/api",
+    tags=["Community"]
 )
 
 @app.get("/")
