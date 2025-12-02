@@ -18,7 +18,7 @@ class Task(Base):
     __tablename__ = "tasks"
 
     id = Column(Integer, primary_key=True, index=True)
-    owner_id = Column(Integer, ForeignKey("user.id"))
+    owner_id = Column(Integer, ForeignKey("users.id"))
     
     name = Column(String, nullable=False) 
     description = Column(String, nullable=True)
