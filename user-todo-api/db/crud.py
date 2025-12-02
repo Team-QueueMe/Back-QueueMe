@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from datetime import date
-from sqlalchemy import cast, Date
+from sqlalchemy import cast, Date, or_, and_
 from . import models, schema
 
 def get_user_by_google_id(db: Session, google_id: str):
@@ -43,6 +43,18 @@ def get_all_tasks(db: Session, user_id: int, skip: int = 0, limit: int = 100):
         .limit(limit)\
         .all()
 
+def get_daily_tasks(db: Session, user_id: int, target_date: date):
+    return db.query(models.Task).filter(
+        models.Task.owner_id == user_id,
+        or_(
+            models.Task.status == "pending",  # 아직 안 끝난 건 무조건 포함
+            and_(
+                models.Task.status == "complete",
+                cast(models.Task.updated_at, Date) == target_date # 완료된 건 날짜 확인
+            )
+        )
+    ).all()
+
 def get_tasks_by_date(db: Session, user_id: int, target_date: date):
     return db.query(models.Task).filter(
         models.Task.owner_id == user_id,
@@ -61,3 +73,19 @@ def update_task_status(db: Session, db_task: models.Task, status: str):
     db.commit()
     db.refresh(db_task)
     return db_task
+
+def get_daily_summary_data(db: Session, user_id: int, target_date: date):
+    tasks = get_daily_tasks(db, user_id, target_date)
+    
+    total_count = len(tasks)
+    progress_percentage = 0
+    
+    if total_count > 0:
+        completed_count = sum(1 for t in tasks if t.status == "complete")
+        progress_percentage = int((completed_count / total_count) * 100)
+        
+    return {
+        "date": target_date,
+        "progress_percentage": progress_percentage,
+        "tasks": tasks
+    }

@@ -41,14 +41,16 @@ async def auth_google_callback(request: Request, code: str, db: Session = Depend
             id_token_jwt = token_res.json().get("id_token")
             if not id_token_jwt:
                 raise HTTPException(status_code=400, detail="id token이 google 응답에서 안보임")
-        except httpx.HTTPStatusError:
+        except httpx.HTTPStatusError as e:
+            print(f"구글 인증 에러: {e.response.text}")
             raise HTTPException(status_code=400, detail="google로 토큰 가져오기 실패")
 
     try:
         id_info = id_token.verify_oauth2_token(
             id_token_jwt, 
             google_requests.Request(), 
-            settings.GOOGLE_CLIENT_ID
+            settings.GOOGLE_CLIENT_ID,
+            clock_skew_in_seconds=10
         )
         
         google_id = id_info.get("sub") 
@@ -58,7 +60,8 @@ async def auth_google_callback(request: Request, code: str, db: Session = Depend
         if not email or not google_id:
             raise HTTPException(status_code=400, detail="토큰이 유효하지 않습니다")
 
-    except ValueError:
+    except ValueError as e:
+        print(e)
         raise HTTPException(status_code=401, detail="유효하지 않은 google token")
 
     user = crud.get_user_by_google_id(db, google_id=google_id)

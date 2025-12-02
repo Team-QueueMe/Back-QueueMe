@@ -1,14 +1,14 @@
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
 
+
 class PostCreate(BaseModel):
     user_name: str
     message: str
-    daily_progress_percentage: int
 
 class PostResponse(BaseModel):
     post_id: int
-    user_id: str # google id 
+    user_id: str
     user_name: str
     message: str
     daily_progress_percentage: int

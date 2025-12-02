@@ -38,7 +38,7 @@ async def read_task(
     return task
 
 
-@router.patch("/tasks/{task_id}/progress", response_model=schema.TaskResponse)
+@router.patch("/tasks/{task_id}/progress", response_model=schema.DailySummaryResponse)
 async def update_task_progress(
     task_id: int,
     update_req: schema.TaskUpdateStatus,
@@ -49,7 +49,9 @@ async def update_task_progress(
     if not task:
         raise HTTPException(status_code=404, detail="할 일을 찾을 수 없습니다.")
     
-    return crud.update_task_status(db, db_task=task, status=update_req.status)
+    crud.update_task_status(db, db_task=task, status=update_req.status)
+    
+    return crud.get_daily_summary_data(db, user_id=current_user.id, target_date=date.today())
 
 
 @router.get("/daily/summary", response_model=schema.DailySummaryResponse)
@@ -62,16 +64,4 @@ async def get_daily_summary(
     if target_date is None:
         target_date = date.today()
     
-    tasks = crud.get_tasks_by_date(db, user_id=current_user.id, target_date=target_date)
-    
-    total_count = len(tasks)
-    progress_percentage = 0
-    if total_count > 0:
-        completed_count = sum(1 for t in tasks if t.status == "complete")
-        progress_percentage = int((completed_count / total_count) * 100)
-
-    return schema.DailySummaryResponse(
-        date=target_date,
-        progress_percentage=progress_percentage,
-        tasks=tasks
-    )
+    return crud.get_daily_summary_data(db, user_id=current_user.id, target_date=target_date)

@@ -29,5 +29,6 @@ class Task(Base):
     status = Column(String, default="pending")
     
     created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     owner = relationship("User", back_populates="tasks")

@@ -24,6 +24,7 @@ class TaskResponse(BaseModel):
     due_date: date
     status: str
     created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True
