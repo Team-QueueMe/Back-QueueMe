@@ -81,7 +81,7 @@ async def read_users_me(
     return current_user
 
 
-@router.post("/api/logout")
+@router.post("/logout")
 async def logout(
     current_user: models.User = Depends(security.get_current_user)
 ):

@@ -10,14 +10,14 @@ router = APIRouter()
 async def create_post(
     post_req: schema.PostCreate,
     db: Session = Depends(database.get_db),
-    current_user: models.User = Depends(security.get_current_user)
+    user_id: int = Depends(security.get_current_user_id)
 ):
-    saved_post = crud.create_community_post(db=db, post=post_req, user_id=current_user.id)
+    saved_post = crud.create_community_post(db=db, post=post_req, user_id=user_id)
     
     return schema.PostResponse(
         post_id=saved_post.id,
-        user_id=current_user.google_id,  
-        user_name=current_user.name,
+        user_id=str(user_id),      
+        user_name=saved_post.user_name,
         message=saved_post.message,
         daily_progress_percentage=saved_post.daily_progress_percentage,
         created_at=saved_post.created_at
@@ -25,8 +25,8 @@ async def create_post(
 
 @router.get("/community/posts", response_model=List[schema.PostResponse])
 async def get_posts(
-    skip: int = 0, # 앞 페이지 분량 다 건너뜀 
-    limit: int = 10, # 한 페이지에 보여줄 게시글 수 
+    skip: int = 0,
+    limit: int = 10,
     db: Session = Depends(database.get_db)
 ):
     posts = crud.get_community_posts(db, skip=skip, limit=limit)
@@ -34,8 +34,8 @@ async def get_posts(
     return [
         schema.PostResponse(
             post_id=post.id,
-            user_id=post.owner.google_id, 
-            user_name=post.owner.name,
+            user_id=str(post.owner_id), 
+            user_name=post.user_name,
             message=post.message,
             daily_progress_percentage=post.daily_progress_percentage,
             created_at=post.created_at
