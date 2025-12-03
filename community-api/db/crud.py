@@ -27,11 +27,14 @@ def calculate_progress(db: Session, user_id: int) -> int:
 def create_community_post(db: Session, post: schema.PostCreate, user_id: int):
     current_progress = calculate_progress(db, user_id)
 
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    author_name = user.name if user else "Unknown"
+
     db_post = models.Post(
         message=post.message,
-        daily_progress_percentage=current_progress, # 계산된 값 저장
+        daily_progress_percentage=current_progress,
         owner_id=user_id,
-        user_name=post.user_name
+        user_name=author_name 
     )
     db.add(db_post)
     db.commit()

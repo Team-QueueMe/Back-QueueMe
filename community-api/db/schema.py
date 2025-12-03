@@ -3,7 +3,6 @@ from datetime import datetime
 
 
 class PostCreate(BaseModel):
-    user_name: str
     message: str
 
 class PostResponse(BaseModel):
