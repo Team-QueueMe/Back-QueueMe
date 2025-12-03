@@ -9,7 +9,7 @@ models.Base.metadata.create_all(bind=database.engine)
 app = FastAPI(
     title="QueueMe Community",
     description="",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 origins = [
