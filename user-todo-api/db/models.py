@@ -27,6 +27,7 @@ class Task(Base):
     due_date = Column(Date, nullable=False)      
 
     status = Column(String, default="pending")
+    display_order = Column(Integer, default=0)
     
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)

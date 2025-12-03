@@ -1,7 +1,69 @@
 from sqlalchemy.orm import Session
+import google.generativeai as genai
 from datetime import date
 from sqlalchemy import cast, Date, or_, and_
 from . import models, schema
+import json 
+from configs.config import settings
+
+genai.configure(api_key=settings.GEMINI_API_KEY)
+
+def get_pending_tasks(db: Session, user_id: int):
+    return db.query(models.Task).filter(
+        models.Task.owner_id == user_id,
+        models.Task.status == "pending"
+    ).all()
+
+
+def get_ai_recommendation(tasks):
+    model = genai.GenerativeModel('gemini-2.5-flash')
+    
+    tasks_data = [
+        {
+            "id": t.id,
+            "name": t.name,
+            "description": t.description,
+            "priority": t.priority,
+            "due_date": str(t.due_date),
+            "category": t.category,
+            "created_at": str(t.created_at)
+        } for t in tasks
+    ]
+
+    prompt = f"""
+    You are a smart task manager. Analyze the following tasks and recommend the best execution order.
+    Prioritize based on 'urgent' priority, closer 'due_date', and older 'created_at'.
+    
+    Tasks: {json.dumps(tasks_data)}
+    
+    Output MUST be a valid JSON array of objects with 'task_id' ONLY. Do not include reasons.
+    Example: [{{"task_id": 1}}, {{"task_id": 3}}, ...]
+    """
+    
+    try:
+        response = model.generate_content(prompt)
+        text = response.text.replace("```json", "").replace("```", "").strip()
+        return json.loads(text)
+    except Exception as e:
+        print(f"AI Error: {e}")
+        return []
+
+def accept_schedule(db: Session, user_id: int, ordered_ids: list[int]):
+    for index, task_id in enumerate(ordered_ids):
+        task = db.query(models.Task).filter(
+            models.Task.id == task_id,
+            models.Task.owner_id == user_id
+        ).first()
+        
+        if task:
+            # 0,1,2.. 순서대로 저장토록 함 
+            task.display_order = index
+            
+    db.commit()
+    
+    from datetime import date
+    return get_daily_summary_data(db, user_id, date.today())
+
 
 def get_user_by_google_id(db: Session, google_id: str):
     return db.query(models.User).filter(models.User.google_id == google_id).first()
@@ -47,13 +109,13 @@ def get_daily_tasks(db: Session, user_id: int, target_date: date):
     return db.query(models.Task).filter(
         models.Task.owner_id == user_id,
         or_(
-            models.Task.status == "pending",  # 아직 안 끝난 건 무조건 포함
+            models.Task.status == "pending",
             and_(
                 models.Task.status == "complete",
-                cast(models.Task.updated_at, Date) == target_date # 완료된 건 날짜 확인
+                cast(models.Task.updated_at, Date) == target_date
             )
         )
-    ).all()
+    ).order_by(models.Task.display_order.asc()).all()
 
 def get_tasks_by_date(db: Session, user_id: int, target_date: date):
     return db.query(models.Task).filter(

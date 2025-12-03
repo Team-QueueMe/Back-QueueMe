@@ -5,7 +5,7 @@ from datetime import timedelta
 from configs import security
 import logging
 
-from api import user, todo 
+from api import user, todo, schedule 
 from db import database, models
 
 logger = logging.getLogger("uvicorn")
@@ -79,6 +79,12 @@ app.include_router(
     todo.router,
     prefix="/api",
     tags=["Todo tasks"]
+)
+
+app.include_router(
+    schedule.router,
+    prefix="/api",
+    tags=["Schedule tasks"]
 )
 
 @app.get("/")

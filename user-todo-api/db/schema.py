@@ -3,6 +3,7 @@ from datetime import date, datetime
 from typing import List, Optional, Literal
 
 
+
 class TaskCreate(BaseModel):
     name: str
     description: Optional[str] = None
@@ -23,6 +24,7 @@ class TaskResponse(BaseModel):
     category: str
     due_date: date
     status: str
+    display_order: int
     created_at: datetime
     updated_at: datetime
 
@@ -46,3 +48,16 @@ class User(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+class RecommendedTaskOrder(BaseModel):
+    task_id: int
+    reason: str
+
+class RecommendationResponse(BaseModel):
+    date: date
+    message: str
+    recommended_tasks: List[TaskResponse]
+
+class AcceptScheduleRequest(BaseModel):
+    ordered_task_ids: List[int]
+
