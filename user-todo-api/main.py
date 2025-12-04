@@ -49,7 +49,11 @@ app = FastAPI(
     title="QueueMe User & Todo Service",
     description="유저 인증 및 할 일 관리 API",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json"
 )
 
 origins = [

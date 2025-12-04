@@ -10,6 +10,10 @@ app = FastAPI(
     title="QueueMe Community",
     description="",
     version="1.0.0",
+
+    docs_url="/api/community/docs",
+    redoc_url="/api/community/redoc",
+    openapi_url="/api/community/openapi.json"
 )
 
 origins = [
