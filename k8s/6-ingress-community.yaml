@@ -5,7 +5,7 @@ metadata:
   namespace: community-ns
   annotations:
     nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "http://localhost:5173|http://localhost:8000|http://localhost:8001"
     nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS, PATCH, DELETE"
     nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
 spec:
